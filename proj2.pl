@@ -16,4 +16,15 @@
 %% 		blocks(Bs1, Bs2, Bs3).
 
 puzzle_solver(Rows) :-
-		length(Rows, 3), maplist(same_length(Rows), Rows),
+		%% Make sure the entry is square, and of size 2x2, 3x3 or 4x4.
+		count(Rows, Len), Len in 2..4, maplist(same_length(Rows), Rows),
+
+		%% maplist(same_length(Rows), Rows),
+		%% Rows = [H|notSum],
+		%% append(notSum, Vs), Vs ins 1..9.
+
+
+count([], 0).
+count([_|Tail], N) :-
+	count(Tail, M),
+	N is M+1.
