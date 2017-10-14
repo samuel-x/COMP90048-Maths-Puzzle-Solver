@@ -26,8 +26,11 @@
 %%		commends)
 %%
 %% Changelog:
+%%  0.06 8th Oct - Program finally works. Correctly guesses 2x2 squares.
+%%					Yay!
+%%
 %%  0.05 8th Oct - Diagonal works properly now! Can successfully derive the 
-%%					correct value. Also on my 2th beer.
+%%					correct value. Alcoholic Beverage Counter: 2.
 %%
 %%  0.04 7th Oct - Changed the product_list and sum_list functions to 
 %%					incorporate the #= operator, to avoid instantiation errors
@@ -54,22 +57,22 @@ puzzle_solution(Rows) :-
 	check_diagonal(Rows),
 	transpose(Rows, Columns),
 	Rows = [_|Row_Tail], Columns = [_|Columns_Tail],
-	check_domain(Row_Tail), check_domain(Columns_Tail),
 	maplist(check_row, Row_Tail),
-	maplist(check_row, Columns_Tail).
+	maplist(check_row, Columns_Tail),
+	ground(Rows).
 
 %% This function checks if a supplied row (or transposed column) fulfills the
 %% specified constraint where the list must sum or product to the heading of
 %% the row or column (in this case, the head of the supplied list).
 check_row([Head|Tail]) :-
+	valid_digits(Tail),
 	sum_list_but_better(Tail, Head);
 	product_list(Tail, Head).
 
-check_domain([Row|Rows]) :-
-	Row = [_|No_Header],
-	%%write(No_Header),
-	valid_digits(No_Header),
-	check_domain(Rows).
+%% check_domain([]).
+%% check_domain(Solution) :-
+%% 	%%write(No_Header),
+%% 	valid_digits(Solution).
 
 valid_digits(Solution) :-
 	Solution ins 1..9,
@@ -80,7 +83,7 @@ product_list([H|T], Product) :-
 	product_list(T, N_Product),
 	Product #= N_Product * H.
 
-sum_list_but_better([],1).
+sum_list_but_better([],0).
 sum_list_but_better([H|T], Sum) :-
 	sum_list_but_better(T, N_Sum),
 	Sum #= N_Sum + H.
@@ -99,7 +102,6 @@ check_diagonal([Head|Rows]) :-
 	diagonal(Rows, 1, []).
 
 diagonal([Row|Tail], Index, Append_To) :-
-	is_list(Row),
 	nth0(Index, Row, Diagonal),
 	New_Index #= Index + 1,
 	diagonal(Tail, New_Index, [Diagonal|Append_To]).
