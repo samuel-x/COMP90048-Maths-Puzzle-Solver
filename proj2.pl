@@ -21,59 +21,74 @@
 %%		|	6	|	3	|	2	|		<- A valid 2x2 maths puzzle
 %%		|	6	|	2	|	3	|
 %%
-%% Changelog
+%% As always, Here's Sam's Style Guide!:
+%% - 78 Character ruler! If the line goes beyond 78 characters (including 
+%%		commends)
+%%
+%% Changelog:
+%%  0.04 7th Oct - Changed the product_list and sum_list functions to 
+%%					incorporate the #= operator, to avoid instantiation errors
+%%					Turns out diagonal in it's current state cannot calculate
+%%					empty spaces. :(
+%%
 %%	0.03 7th Oct - Program now can correctly check if a row fulfills the 
 %%					sum or product constraint. (As in the elements of the
-%%					row or column will sum or product to the heading)
+%%					row or column will sum or product to the heading). Yay!
 %%
 %% 	0.02 7th Oct - Program successfully checks for diagonal constraints
 %%
 %% 	0.01 7th Oct - Program correctly checks for square and same length 
-%%				    constraints
+%%				    constraints. This language is interesting.
 %%
 
 :- ensure_loaded(library(clpfd)).
 
-puzzle_solver(Rows) :-
-		%% Make sure the entry is square, and of size 2x2, 3x3 or 4x4.
-		count(Rows, Len), Len in 2..4, maplist(same_length(Rows), Rows),
-		diagonal(Rows, Len, _, 0),
-		transpose(Rows, Columns),
-		maplist(check_rows, Rows),
-		maplist(check_rows, Columns).
+%% This function starts the puzzle!
+puzzle_solution(Rows) :-
+	%% Make sure the entry is square, and of size 2x2, 3x3 or 4x4.
+	count(Rows, Len), Len in 3..5, maplist(same_length(Rows), Rows),
+	%% Check if the supplied puzzle fulfills the diagonal constraint.
+	diagonal(Rows, 0, 0),
+	transpose(Rows, Columns),
+	Rows = [_|Row_Tail], Columns = [_|Columns_Tail],
+	maplist(check_row, Row_Tail),
+	maplist(check_row, Columns_Tail).
 
-check_rows([Head|Tail]) :-
-		sum_list(Tail, Head);
-		product_list(Tail, Head).
+%% This function checks if a supplied row (or transposed column) fulfills the
+%% specified constraint where the list must sum or product to the heading of
+%% the row or column (in this case, the head of the supplied list).
+check_row([Head|Tail]) :-
+	valid_digits(Tail),
+	sum_list_but_better(Tail, Head);
+	product_list(Tail, Head).
+
+valid_digits(Solution) :-
+	Solution ins 1..9,
+	all_distinct(Solution).
+
+product_list([],1).
+product_list([H|T], Product) :-
+	product_list(T, N_Product),
+	Product #= N_Product * H.
+
+sum_list_but_better([],1).
+sum_list_but_better([H|T], Sum) :-
+	sum_list_but_better(T, N_Sum),
+	Sum #= N_Sum + H.
+
 
 %% Counts the number of elements in a list
 count([], 0).
 count([_|Tail], N) :-
 	count(Tail, M),
-	N is M+1.
+	N #= M+1.
 
-%% Base case for the diagonal checking function.
-diagonal([], 0, 0, 0).
+diagonal([],_,_).
+
 %% If the length and the nth of the row (the diagonal) has reached the final
 %% row, then terminate.
-diagonal([], Len, _, Pos) :-
-	Pos == Len+1,
-	diagonal([], 0, 0, 0).
-%% Check the top left corner (which should be 0), and begin checking the
-%% diagonals.
-diagonal([[0|_],[_,ToMatch|_]|Tail], Len, _, 0) :-
-	diagonal(Tail, Len, ToMatch, 3).
-%% Check the nth diagonal.
-diagonal([Row|Tail], Len, Match, Pos) :-
-	get_elem(Match, Row, Pos),
-	diagonal(Tail, Len, Match, Pos+1).
-
-product_list([],1).
-product_list([H|T], Product) :-
-	product_list(T, N_Product),
-	Product is N_Product * H.
-
-%% Gets the nth element of the list.
-get_elem(X, [X|_], 1).
-get_elem(X,[_|T], I) :-
-	get_elem(X, T, N_I), I is N_I + 1.
+diagonal([[0|_],[_,Match|_]|Tail], 0, 0) :-
+	diagonal(Tail, 1, Match).
+diagonal([Row|Tail], Pos, Prev_Match) :-
+	nth0(New_Pos, Row, Match), Prev_Match #= Match,
+	diagonal(Tail, New_Pos, Match), New_Pos is Pos + 1.
