@@ -26,6 +26,9 @@
 %%		commends)
 %%
 %% Changelog:
+%%  0.05 8th Oct - Diagonal works properly now! Can successfully derive the 
+%%					correct value. Also on my 2th beer.
+%%
 %%  0.04 7th Oct - Changed the product_list and sum_list functions to 
 %%					incorporate the #= operator, to avoid instantiation errors
 %%					Turns out diagonal in it's current state cannot calculate
@@ -48,9 +51,10 @@ puzzle_solution(Rows) :-
 	%% Make sure the entry is square, and of size 2x2, 3x3 or 4x4.
 	count(Rows, Len), Len in 3..5, maplist(same_length(Rows), Rows),
 	%% Check if the supplied puzzle fulfills the diagonal constraint.
-	diagonal(Rows, 0, 0),
+	check_diagonal(Rows),
 	transpose(Rows, Columns),
 	Rows = [_|Row_Tail], Columns = [_|Columns_Tail],
+	check_domain(Row_Tail), check_domain(Columns_Tail),
 	maplist(check_row, Row_Tail),
 	maplist(check_row, Columns_Tail).
 
@@ -58,9 +62,14 @@ puzzle_solution(Rows) :-
 %% specified constraint where the list must sum or product to the heading of
 %% the row or column (in this case, the head of the supplied list).
 check_row([Head|Tail]) :-
-	valid_digits(Tail),
 	sum_list_but_better(Tail, Head);
 	product_list(Tail, Head).
+
+check_domain([Row|Rows]) :-
+	Row = [_|No_Header],
+	%%write(No_Header),
+	valid_digits(No_Header),
+	check_domain(Rows).
 
 valid_digits(Solution) :-
 	Solution ins 1..9,
@@ -83,12 +92,34 @@ count([_|Tail], N) :-
 	count(Tail, M),
 	N #= M+1.
 
-diagonal([],_,_).
+zero_check([0|_]).
 
-%% If the length and the nth of the row (the diagonal) has reached the final
-%% row, then terminate.
-diagonal([[0|_],[_,Match|_]|Tail], 0, 0) :-
-	diagonal(Tail, 1, Match).
-diagonal([Row|Tail], Pos, Prev_Match) :-
-	nth0(New_Pos, Row, Match), Prev_Match #= Match,
-	diagonal(Tail, New_Pos, Match), New_Pos is Pos + 1.
+check_diagonal([Head|Rows]) :- 
+	zero_check(Head),
+	diagonal(Rows, 1, []).
+
+diagonal([Row|Tail], Index, Append_To) :-
+	is_list(Row),
+	nth0(Index, Row, Diagonal),
+	New_Index #= Index + 1,
+	diagonal(Tail, New_Index, [Diagonal|Append_To]).
+
+diagonal([], _, Appended) :-
+	check_same(Appended).
+
+check_same([]).
+check_same([_]).
+check_same([H, X|T]) :-
+	H #= X,
+	check_same([X|T]).
+
+
+%% diagonal([],_,_).
+
+%% %% If the length and the nth of the row (the diagonal) has reached the final
+%% %% row, then terminate.
+%% diagonal([[0|_],[_,Prev_Match|_]|Tail], 0, 0) :-
+%% 	diagonal(Tail, 1, Match), Match #= Prev_Match.
+%% diagonal([Row|Tail], Pos, Prev_Match) :-
+%% 	nth0(New_Pos, Row, Match), Match #= Prev_Match,
+%% 	diagonal(Tail, New_Pos, Match), New_Pos is Pos + 1.
