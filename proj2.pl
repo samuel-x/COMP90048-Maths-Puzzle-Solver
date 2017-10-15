@@ -39,7 +39,8 @@
 %% Changelog:
 %%	1.1 9th Oct - [SUBMISSION 2]
 %%					Renamed some functions. Cleared up some comments and made
-%%					things neater.
+%%					things neater. Removed count\2 as it was a duplicate of
+%%					the inbuilt function length\2.
 %%
 %%	1.0 8th Oct - [SUBMISSION]
 %%					Turns out program already worked, just needed to label 
