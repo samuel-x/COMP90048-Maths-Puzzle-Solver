@@ -28,7 +28,7 @@
 %%
 %% As always, Here's Sam's Style Guide!:
 %% - 78 Character ruler! If the line goes beyond 78 characters (including 
-%%		commends)
+%%		comments)
 %% - Functions in Prolog should be all <lower_case> with underscores, 
 %%		following the way built-in functions are written.
 %% - Atoms should be spelt with <Capital_Letters> and underscores, for the
