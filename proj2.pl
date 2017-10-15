@@ -24,10 +24,17 @@
 %% As always, Here's Sam's Style Guide!:
 %% - 78 Character ruler! If the line goes beyond 78 characters (including 
 %%		commends)
+%% - Functions in Prolog should be all <lower_case> with underscores, 
 %%
 %% Changelog:
-%%  0.06 8th Oct - Program finally works. Correctly guesses 2x2 squares.
-%%					Yay!
+%%	1.0 8th Oct - [SUBMISSION]
+%%					Turns out program already worked, just needed to label 
+%%					the values. Also, must define for valid domain and 
+%%					distinct values BEFORE defining sum and product
+%%					constraints (not while doing it).
+%%
+%%  0.33 8th Oct - Program finally works. Correctly guesses 2x2 squares.
+%%					Yay! (Named version 0.33 because it has 33% correct).
 %%
 %%  0.05 8th Oct - Diagonal works properly now! Can successfully derive the 
 %%					correct value. Alcoholic Beverage Counter: 2.
@@ -57,15 +64,17 @@ puzzle_solution(Rows) :-
 	check_diagonal(Rows),
 	transpose(Rows, Columns),
 	Rows = [_|Row_Tail], Columns = [_|Columns_Tail],
+	maplist(valid_digits, Row_Tail),
+	maplist(valid_digits, Columns_Tail),
 	maplist(check_row, Row_Tail),
 	maplist(check_row, Columns_Tail),
-	ground(Rows).
+	append(Row_Tail, Non_Header),
+	label(Non_Header).
 
 %% This function checks if a supplied row (or transposed column) fulfills the
 %% specified constraint where the list must sum or product to the heading of
 %% the row or column (in this case, the head of the supplied list).
 check_row([Head|Tail]) :-
-	valid_digits(Tail),
 	sum_list_but_better(Tail, Head);
 	product_list(Tail, Head).
 
@@ -74,7 +83,7 @@ check_row([Head|Tail]) :-
 %% 	%%write(No_Header),
 %% 	valid_digits(Solution).
 
-valid_digits(Solution) :-
+valid_digits([_|Solution]) :-
 	Solution ins 1..9,
 	all_distinct(Solution).
 
@@ -114,14 +123,3 @@ check_same([_]).
 check_same([H, X|T]) :-
 	H #= X,
 	check_same([X|T]).
-
-
-%% diagonal([],_,_).
-
-%% %% If the length and the nth of the row (the diagonal) has reached the final
-%% %% row, then terminate.
-%% diagonal([[0|_],[_,Prev_Match|_]|Tail], 0, 0) :-
-%% 	diagonal(Tail, 1, Match), Match #= Prev_Match.
-%% diagonal([Row|Tail], Pos, Prev_Match) :-
-%% 	nth0(New_Pos, Row, Match), Match #= Prev_Match,
-%% 	diagonal(Tail, New_Pos, Match), New_Pos is Pos + 1.
