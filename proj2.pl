@@ -29,8 +29,8 @@
 %% As always, Here's Sam's Style Guide!:
 %% - 78 Character ruler! If the line goes beyond 78 characters (including 
 %%		comments)
-%% - Functions in Prolog should be all <lower_case> with underscores, 
-%%		following the way built-in functions are written.
+%% - Predicates in Prolog should be all <lower_case> with underscores, 
+%%		following the way built-in predicates are written.
 %% - Atoms should be spelt with <Capital_Letters> and underscores, for the
 %% 		sake of consistency, as single letter atoms should be spelt with 
 %%		capitals.
@@ -38,9 +38,9 @@
 %%
 %% Changelog:
 %%	1.1 9th Oct - [SUBMISSION 2]
-%%					Renamed some functions. Cleared up some comments and made
+%%					Renamed some predicates. Cleared up some comments and made
 %%					things neater. Removed count\2 as it was a duplicate of
-%%					the inbuilt function length\2.
+%%					the inbuilt predicate length\2.
 %%
 %%	1.0 8th Oct - [SUBMISSION]
 %%					Turns out program already worked, just needed to label 
@@ -54,7 +54,7 @@
 %%  0.05 8th Oct - Diagonal works properly now! Can successfully derive the 
 %%					correct value. Alcoholic Beverage Counter: 2.
 %%
-%%  0.04 7th Oct - Changed the product_list and sum_list functions to 
+%%  0.04 7th Oct - Changed the product_list and sum_list predicates to 
 %%					incorporate the #= operator, to avoid instantiation errors
 %%					Turns out diagonal in it's current state cannot calculate
 %%					empty spaces. :(
@@ -72,7 +72,7 @@
 %% Load in CLPFD library
 :- ensure_loaded(library(clpfd)).
 
-%% This function starts the puzzle!
+%% This predicate starts the puzzle!
 puzzle_solution(Rows) :-
 	%% Make sure the entry is square, and of size 2x2, 3x3 or 4x4.
 	length(Rows, Len), Len in 3..5, maplist(same_length(Rows), Rows),
@@ -102,7 +102,7 @@ puzzle_solution(Rows) :-
 
 /*---------------------- Checking For Valid Digits -------------------------*/
 
-%% This function checks the row for valid values. A valid value is a value 
+%% This predicate checks the row for valid values. A valid value is a value 
 %% is 
 %% a) A digit between 1 to 9.
 %% b) Not a repeating value for that row/column.
@@ -112,14 +112,14 @@ valid_digits([_|Solution]) :-
 
 /*--------------- Checking For Product and Sum Constraints -----------------*/
 
-%% This function checks if a supplied row (or transposed column) fulfills the
+%% This predicate checks if a supplied row (or transposed column) fulfills the
 %% specified constraint where the list must sum or product to the heading of
 %% the row or column (in this case, the head of the supplied list).
 check_row([Head|Tail]) :-
 	check_sum(Tail, Head);
 	check_product(Tail, Head).
 
-%% This function checks if the supplied row sufficiently fulfills the product
+%% This predicate checks if the supplied row sufficiently fulfills the product
 %% constraint, that is, the product of the row correctly multiples to the 
 %% "Product".
 check_product([],1).
@@ -127,7 +127,7 @@ check_product([H|T], Product) :-
 	check_product(T, N_Product),
 	Product #= N_Product * H.
 
-%% This function checks if the supplied row sufficiently fulfills the sum
+%% This predicate checks if the supplied row sufficiently fulfills the sum
 %% constraint, that is, the sum of the row correctly sums to "Sum".
 check_sum([],0).
 check_sum([H|T], Sum) :-
@@ -135,7 +135,7 @@ check_sum([H|T], Sum) :-
 	Sum #= N_Sum + H.
 
 /*--------------- Checking the Diagonal Constraint -------------------------*/
-%% This function checks for the diagonal constraint.
+%% This predicate checks for the diagonal constraint.
 %% It initially checks for the zero in the top left, and then makes sure that
 %% all the diagonals are the same. This is done by appending all the diagonals
 %% into an array and checking the array if all elements are the same in
@@ -144,7 +144,7 @@ check_diagonal([Head|Rows]) :-
 	zero_check(Head),
 	diagonal(Rows, 1, []).
 
-%% This is the function which is used for the non-heading squares. Checks an
+%% This is the predicate which is used for the non-heading squares. Checks an
 %% element at the incremented index (the diagonal), and appends this to an 
 %% array for checking later.
 diagonal([Row|Tail], Index, Append_To) :-
@@ -159,7 +159,7 @@ diagonal([Row|Tail], Index, Append_To) :-
 diagonal([], _, Appended) :-
 	check_same(Appended).
 
-%% This function checks if everything in an array is the same value.
+%% This predicate checks if everything in an array is the same value.
 check_same([]).
 check_same([_]).
 check_same([H, X|T]) :-
